@@ -8,7 +8,7 @@ on:
       - feature/github_actions
 
 jobs:
-  build:
+  build-ubuntu:
     runs-on: ubuntu-latest
     permissions: write-all
     steps:
@@ -31,24 +31,59 @@ jobs:
       - name: Package
         run: cmake --build . --target package
       
+      - name: Upload Ubuntu artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ubuntu-package
+          path: ./helloworld-0.0.${{ github.run_number }}-Linux.deb
+
+  build-windows:
+    runs-on: windows-latest
+    permissions: write-all
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          submodules: true
+      
+      - name: Install Boost
+        run: choco install boost-msvc-14.3 -y
+      
+      - name: Configure CMake
+        run: cmake . -DPATCH_VERSION=${{ github.run_number }}
+      
+      - name: Build
+        run: cmake --build . --config Release
+      
+      - name: Run tests
+        run: ctest -C Release
+      
+      - name: Upload Windows artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-exe
+          path: ./Release/helloworld_cli.exe
+
+  create-release:
+    needs: [build-ubuntu, build-windows]
+    runs-on: ubuntu-latest
+    permissions: write-all
+    if: github.ref == 'refs/heads/master' || github.ref == 'refs/heads/main'
+    steps:
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: ./artifacts
+      
       - name: Create Release
         id: create_release
-        uses: actions/create-release@v1
+        uses: softprops/action-gh-release@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tag_name: ${{ github.run_number }}
-          release_name: Release ${{ github.run_number }}
+          tag_name: v${{ github.run_number }}
+          name: Release ${{ github.run_number }}
           draft: false
           prerelease: false
-      
-      - name: Upload Release Asset
-        id: upload-release-asset
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./helloworld-0.0.${{ github.run_number }}-Linux.deb
-          asset_name: helloworld-0.0.${{ github.run_number }}-Linux.deb
-          asset_content_type: application/vnd.debian.binary-package
+          files: |
+            ./artifacts/ubuntu-package/*.deb
+            ./artifacts/windows-exe/*.exe
