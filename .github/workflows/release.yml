@@ -63,7 +63,7 @@ jobs:
           name: windows-exe
           path: ./Release/helloworld_cli.exe
 
-    create-release:
+  create-release:
     needs: [build-ubuntu, build-windows]
     runs-on: ubuntu-latest
     permissions: write-all
@@ -79,7 +79,6 @@ jobs:
           mv ./artifacts/windows-exe/helloworld_cli.exe ./artifacts/windows-exe/helloworld-0.0.${{ github.run_number }}-Windows.exe
       
       - name: Create Release
-        id: create_release
         uses: softprops/action-gh-release@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
