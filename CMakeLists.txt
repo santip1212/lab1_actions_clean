@@ -9,7 +9,7 @@ if(NOT PATCH_VERSION)
     set(PATCH_VERSION "1")
 endif()
 
-set(PROJECT_VERSION 0.0.${PATCH_VERSION})
+set(PROJECT_VERSION 1.0.${PATCH_VERSION})
 project(helloworld VERSION ${PROJECT_VERSION})
 
 project(helloworld VERSION ${PROJECT_VERSION})
