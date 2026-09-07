@@ -35,7 +35,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: ubuntu-package
-          path: ./helloworld-0.0.${{ github.run_number }}-Linux.deb
+          path: ./helloworld-1.0.${{ github.run_number }}-Linux.deb
 
   build-windows:
     runs-on: windows-latest
@@ -76,7 +76,7 @@ jobs:
       
       - name: Rename Windows executable
         run: |
-          mv ./artifacts/windows-exe/helloworld_cli.exe ./artifacts/windows-exe/helloworld-0.0.${{ github.run_number }}-Windows.exe
+          mv ./artifacts/windows-exe/helloworld_cli.exe ./artifacts/windows-exe/helloworld-1.0.${{ github.run_number }}-Windows.exe
       
       - name: Create Release
         uses: softprops/action-gh-release@v1
